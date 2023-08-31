@@ -53,7 +53,8 @@ scripts_to_download = [
     ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/train_users.py', os.path.join(temp_dir, 'train_users.py')),
     ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_item_online_visitor.py', os.path.join(temp_dir, 'choose_item_online_visitor.py')),
     ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_item_online_user.py', os.path.join(temp_dir, 'choose_item_online_user.py')),
-    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_items_many_offline_users.py', os.path.join(temp_dir, 'choose_items_many_offline_users.py'))
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_items_many_offline_users.py', os.path.join(temp_dir, 'choose_items_many_offline_users.py')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/create_df_users_requesting_recommendation_for_testing.py', os.path.join(temp_dir, 'create_df_users_requesting_recommendation_for_testing.py'))
 ]
 
 data_to_download = [
@@ -70,29 +71,22 @@ download_multiple_files(data_to_download)
 Load the data into memory
 """
 
-# Load data
-# 1. Load all scripts into memory
-def load_scripts_into_memory(script_list):
-    script_content = {}
-    
+# Load all scripts into memory directly as strings
+def load_scripts_as_strings(script_list):  
     for _, path in script_list:
+        script_name = os.path.basename(path).replace('.py', '')
         with open(path, 'r') as file:
-            script_content[os.path.basename(path)] = file.read()
-    
-    return script_content
+            globals()[script_name] = file.read()
 
-# 2. Load all pickle data into memory
-def load_data_into_memory(data_list):
-    data_content = {}
-    
+# Load all pickle data into memory and directly assign to dataframes
+def load_dataframes(data_list):
     for _, path in data_list:
-        data_content[os.path.basename(path)] = pd.read_pickle(path)
-    
-    return data_content
+        name_without_extension = os.path.basename(path).replace('.pkl', '')
+        globals()[name_without_extension] = pd.read_pickle(path)
 
 # Execute the functions
-scripts_in_memory = load_scripts_into_memory(scripts_to_download)
-data_in_memory = load_data_into_memory(data_to_download)
+load_scripts_as_strings(scripts_to_download)
+load_dataframes(data_to_download)
 
 # Print paths for scripts to easily open them in your IDE
 print("Scripts downloaded to:")
@@ -103,6 +97,8 @@ print("Data downloaded to:")
 for _, path in data_to_download:
     print(path)
 
-print("\nData loaded into 'data' dictionary.")
+print("\nData loaded into memory.")
+
+print(df_interactions)
 
 
