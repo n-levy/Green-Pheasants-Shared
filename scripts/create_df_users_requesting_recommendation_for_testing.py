@@ -32,5 +32,5 @@ def create_users_requesting_recommendation(df_users, n):
     return df_users_requesting_recommendation
 
 # Example usage:
-result_df = create_users_requesting_recommendation(df_users, 5)
+df_users_requesting_recommendation = create_users_requesting_recommendation(df_users, 5)
 print(result_df)
