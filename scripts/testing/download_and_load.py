@@ -1,33 +1,30 @@
-######################################################
-#### Download the python scripts and example data ####
-######################################################
+###############################################################################
+#### Download the python scripts and example data, and load them to memory ####
+###############################################################################
 
 """
-This script downloads the python code and example data
-for the Green Pheasants recommendation system.
+This script:
+1. Downloads the python code and example data for the Green Pheasants recommendation system.
+2. Loads the scripts and the data to memory.
 """
 
 """
-Install and import the packages for the testing script
+Install (if necessary) and import the packages for the testing script
 """
 # pip install requests
 # pip install subprocess
+# pip install pandas
 
 import requests
 import os
+import tempfile
+import pandas as pd
 
 """
 Define functions for downloading the scripts and sample datasets from Github and saving them in the local environment
 """
 
 def download_github_file(url, save_path):
-    """
-    Download a file from GitHub and save it to the specified path.
-    
-    Parameters:
-    - url (str): The URL of the raw file from GitHub.
-    - save_path (str): The local path where the file should be saved.
-    """
     response = requests.get(url)
     response.raise_for_status()
     
@@ -37,44 +34,75 @@ def download_github_file(url, save_path):
         file.write(response.content)
 
 def download_multiple_files(file_list):
-    """
-    Download multiple files from GitHub.
-    
-    Parameters:
-    - file_list (list of tuples): Each tuple contains the GitHub URL and the local save path.
-    """
     for url, save_path in file_list:
         download_github_file(url, save_path)
         print(f"Downloaded {url} to {save_path}")
+        
+# Create a temporary directory
+temp_dir = tempfile.mkdtemp()
 
 """
 Download the files from Github
 """
 
-### Download the scripts
-if __name__ == '__main__':
-    files_to_download = [
-        ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/configuration.py', './downloaded_scripts/configuration.py'),
-        ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/functions.py', './downloaded_scripts/functions.py'),
-        ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/train_visitors.py', './downloaded_scripts/train_visitors.py'),
-        ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/train_users.py', './downloaded_scripts/train_users.py'),
-        ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_item_online_visitor.py', './downloaded_scripts/choose_item_online_visitor.py'),
-        ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_item_online_user.py', './downloaded_scripts/choose_item_online_user.py'),
-        ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_items_many_offline_users.py', './downloaded_scripts/choose_items_many_offline_users.py')
-    ]
+# Define lists of files to download
+scripts_to_download = [
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/configuration.py', os.path.join(temp_dir, 'configuration.py')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/functions.py', os.path.join(temp_dir, 'functions.py')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/train_visitors.py', os.path.join(temp_dir, 'train_visitors.py')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/train_users.py', os.path.join(temp_dir, 'train_users.py')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_item_online_visitor.py', os.path.join(temp_dir, 'choose_item_online_visitor.py')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_item_online_user.py', os.path.join(temp_dir, 'choose_item_online_user.py')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_items_many_offline_users.py', os.path.join(temp_dir, 'choose_items_many_offline_users.py'))
+]
 
-    download_multiple_files(files_to_download)
+data_to_download = [
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/example_data/df_users.pkl', os.path.join(temp_dir, 'df_users.pkl')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/example_data/df_items.pkl', os.path.join(temp_dir, 'df_items.pkl')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/example_data/df_interactions.pkl', os.path.join(temp_dir, 'df_interactions.pkl'))
+]
 
-### Download the sample dataframes
-if __name__ == '__main__':
-    files_to_download = [
-        ('https://github.com/n-levy/Green-Pheasants-Shared/blob/main/example_data/df_users.pkl', './example_data/df_users.pkl'),
-        ('https://github.com/n-levy/Green-Pheasants-Shared/blob/main/example_data/df_users.pkl', './example_data/df_items.pkl'),
-        ('https://github.com/n-levy/Green-Pheasants-Shared/blob/main/example_data/df_users.pkl', './example_data/df_interactions.pkl')
-    ]
+# Download the scripts and data
+download_multiple_files(scripts_to_download)
+download_multiple_files(data_to_download)
 
-    download_multiple_files(files_to_download)
+"""
+Load the data into memory
+"""
 
+# Load data
+# 1. Load all scripts into memory
+def load_scripts_into_memory(script_list):
+    script_content = {}
+    
+    for _, path in script_list:
+        with open(path, 'r') as file:
+            script_content[os.path.basename(path)] = file.read()
+    
+    return script_content
 
+# 2. Load all pickle data into memory
+def load_data_into_memory(data_list):
+    data_content = {}
+    
+    for _, path in data_list:
+        data_content[os.path.basename(path)] = pd.read_pickle(path)
+    
+    return data_content
+
+# Execute the functions
+scripts_in_memory = load_scripts_into_memory(scripts_to_download)
+data_in_memory = load_data_into_memory(data_to_download)
+
+# Print paths for scripts to easily open them in your IDE
+print("Scripts downloaded to:")
+for _, path in scripts_to_download:
+    print(path)
+    
+print("Data downloaded to:")
+for _, path in data_to_download:
+    print(path)
+
+print("\nData loaded into 'data' dictionary.")
 
 

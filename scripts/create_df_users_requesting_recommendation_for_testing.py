@@ -1,19 +1,36 @@
 ### create df_users_requesting_recommendation ###
 
-# Get unique values
-unique_values = df_users['userid'].unique()
+import pandas as pd
 
-# Create a subset. In this case, we'll take the first 1 unique values.
-# Adjust this to get the subset size you want.
-subset = unique_values[:5]
+def create_users_requesting_recommendation(df_users, n):
+    """
+    Creates a dataframe with 'n' unique userids from the provided dataframe 'df_users'.
 
-# Create new series from subset of unique values
-df_users_requesting_recommendation = pd.Series(subset)
+    Parameters:
+    - df_users: Dataframe containing user data.
+    - n: Number of unique userids to be included in the output dataframe.
 
-# convert the series to a dataframe
-df_users_requesting_recommendation = df_users_requesting_recommendation.to_frame()
+    Returns:
+    - df_users_requesting_recommendation: Dataframe containing 'n' unique userids.
+    """
+    
+    # Get unique values
+    unique_values = df_users['userid'].unique()
 
-# change column name to 'userid'
-df_users_requesting_recommendation.columns = ['userid']
+    # Create a subset using the first 'n' unique values.
+    subset = unique_values[:n]
 
+    # Create new series from subset of unique values
+    df_users_requesting_recommendation = pd.Series(subset)
 
+    # Convert the series to a dataframe
+    df_users_requesting_recommendation = df_users_requesting_recommendation.to_frame()
+
+    # Change column name to 'userid'
+    df_users_requesting_recommendation.columns = ['userid']
+
+    return df_users_requesting_recommendation
+
+# Example usage:
+result_df = create_users_requesting_recommendation(df_users, 5)
+print(result_df)
