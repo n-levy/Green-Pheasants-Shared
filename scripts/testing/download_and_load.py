@@ -54,7 +54,7 @@ scripts_to_download = [
     ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_item_online_visitor.py', os.path.join(temp_dir, 'choose_item_online_visitor.py')),
     ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_item_online_user.py', os.path.join(temp_dir, 'choose_item_online_user.py')),
     ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_items_many_offline_users.py', os.path.join(temp_dir, 'choose_items_many_offline_users.py')),
-    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/create_df_users_requesting_recommendation_for_testing.py', os.path.join(temp_dir, 'create_df_users_requesting_recommendation_for_testing.py'))
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/functions_for_testing.py', os.path.join(temp_dir, 'functions_for_testing.py'))
 ]
 
 data_to_download = [
@@ -78,7 +78,7 @@ def load_scripts_as_strings(script_list):
         with open(path, 'r') as file:
             globals()[script_name] = file.read()
 
-# Load all pickle data into memory and directly assign to dataframes
+# Load all pickle data into memory and assign it to dataframes
 def load_dataframes(data_list):
     for _, path in data_list:
         name_without_extension = os.path.basename(path).replace('.pkl', '')
@@ -99,6 +99,5 @@ for _, path in data_to_download:
 
 print("\nData loaded into memory.")
 
-print(df_interactions)
 
 
