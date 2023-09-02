@@ -147,17 +147,25 @@ def function_df_filter_theme_mood(df_interactions, theme='all', mood='all'):
 ############################################################################################################################
 
 def function_attach_userids_to_items(df_users, df_items):
-
-    ### Concatenating users_requesting_recommendation and df_items
-   # Validation
-   assert 'userid' in df_users.columns, "df_users must contain 'userid' column"
-   assert 'itemid' in df_items.columns, "df_items must contain 'itemid' column"
-   assert 'creatorid' in df_items.columns, "df_items must contain 'creatorid' column"
+    """
+    Return the cartesian product of df_users and df_items.
     
-   # Create the Cartesian product of users and items
-   df_users_items = df_users[['userid']].merge(df_items[['itemid', 'creatorid']], how='cross')
+    Parameters:
+    - df_users (pd.DataFrame): DataFrame with user details.
+    - df_items (pd.DataFrame): DataFrame with item details.
+    
+    Returns:
+    - pd.DataFrame: DataFrame with every combination of users and items.
+    """
+    
+    # Add a temporary key to both dataframes for the merge
+    df_users['key'] = 1
+    df_items['key'] = 1
 
-   return(df_users_items)
+    # Merge the dataframes to get a cartesian product and drop the temporary key
+    df_users_items = df_users.merge(df_items, on='key').drop('key', axis=1)
+    
+    return df_users_items
 
 ##################################################################################
 ###### A function that removes items that the users have viewed in the past ######
@@ -379,7 +387,7 @@ def function_calculate_recommendation_probabilities_one_user(df_users_requesting
    df_users_items_with_betas_one_user=df_users_items_with_betas_one_user.copy()
    df_users_items_with_betas_one_user=function_removing_viewed_items(df_interactions, df_users_items_with_betas_one_user)
    
-   # switching to the visitor function in case its a new user
+   # switching to the visitor function in case it is a new user
    if len(df_users_items_with_betas_one_user)==0: # in this case the user is new
        df_items_with_betas = function_calculate_probabilities_visitors(df_interactions, df_items) # creating the betas
        df_with_final_predictions = function_calculate_recommendation_probabilities_one_visitor(df_items_with_betas, theme, mood) # calculating the final predictions
