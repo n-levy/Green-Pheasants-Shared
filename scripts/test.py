@@ -56,8 +56,8 @@ We are now ready to test providing a recommendation to a visitor.
 First, let us choose a theme and a mood for the test (in production, the theme and mood will be chosen by the visitor)
 """
 # choose theme and mood for the test
-theme = 'Relationships'
-mood = 'all'
+theme = 'all'
+mood = 'Reflective'
 
 # run the script for choosing one item for an online visitor
 exec(choose_item_online_visitor)
@@ -85,7 +85,7 @@ We now test the script that provides a recommendation to an online user.
 For the test, we choose a random userid, a theme and a mood. Note that in production, these will all be provided by the PWA.
 """
 # choose theme and mood for the test
-theme = 'Relationships'
+theme = 'Loss'
 mood = 'all'
 
 # choose one random userid
@@ -103,6 +103,10 @@ Now let's check whether the item has the theme or mood that the user has chosen.
 """
 # check item has the chosen theme or mood
 check_item_theme_mood(theme, mood)
+
+"""
+The recommended item should have the chosen theme or the chosen moood, in case the user chose a theme or a mood.
+"""
 
 """
 The final tests is for mutliple users who chose to receive recommendations

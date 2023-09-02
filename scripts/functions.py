@@ -162,8 +162,14 @@ def function_attach_userids_to_items(df_users, df_items):
     df_users['key'] = 1
     df_items['key'] = 1
 
-    # Merge the dataframes to get a cartesian product and drop the temporary key
-    df_users_items = df_users.merge(df_items, on='key').drop('key', axis=1)
+    # Merge the dataframes to get a cartesian product
+    df_users_items = df_users.merge(df_items, on='key')
+    
+    # Rename the userid_x column to userid
+    df_users_items.rename(columns={'userid_x': 'userid'}, inplace=True)
+    
+    # Drop the unnecessary columns (key and any other duplicate columns like userid_y if present)
+    df_users_items.drop(columns=['key', 'userid_y'] if 'userid_y' in df_users_items.columns else ['key'], inplace=True)
     
     return df_users_items
 
