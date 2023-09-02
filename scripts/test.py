@@ -52,7 +52,11 @@ If df_users_items_with_betas was created, then the function was probably success
 We are now ready to test providing a recommendation to a visitor.
 """
 # run the script for choosing one item for an online visitor
+theme = 'all'
+mood = 'Reflective'
 exec(choose_item_online_visitor)
+
+from choose_item_online_visitor import *
 
 # examine the results
 print(df_results)
@@ -62,7 +66,15 @@ The output is supposed to be a dataframe that contains:
     a. The modelid (The code randomly chooses one model out of two possibilites, the purpose is to A/B test the recommendation model)
     b. The model name
     c. The itemid of the recommended item
-If this is indeed the output, then the test is successful.
+
+Now let's check whether the item has the theme or mood that the visitor has chosen.
+"""
+
+# check item has the chosen theme or mood
+check_item_theme_mood(theme, mood)
+
+"""
+The recommended item should have the chosen theme or the chosen moood, in case the user chose a theme or a mood.
 """
 
 """
