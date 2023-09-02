@@ -37,10 +37,6 @@ def create_users_requesting_recommendation(df_users, n):
 
     return df_users_requesting_recommendation
 
-# Example usage:
-userids_requesting_recommendation = create_users_requesting_recommendation(df_users, 5)
-print(result_df)
-
 ###########################################################################################################
 ### Check whether the online recommendation for a user or for a visitor has the specified theme or mood ###
 ###########################################################################################################
