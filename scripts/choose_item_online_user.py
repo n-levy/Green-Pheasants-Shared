@@ -4,7 +4,7 @@
 
 # Filter the interactions dataframe, so that it would include
 # only items with the theme or with the mood that the user chose.
-df_interactions = function_df_filter_theme_mood(df_interactions, theme, mood)
+# df_interactions = function_df_filter_theme_mood(df_interactions, theme, mood)
 
 # calculate the probabilities
 df_with_final_predictions = function_calculate_recommendation_probabilities_one_user(df_users_requesting_recommendation, df_users_items_with_betas, theme, mood) # calculating the final predictions
