@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Aug 31 20:38:35 2023
-
-@author: nlevy
-"""
+########################
+### Loading packages ###
+########################
 
 """
 All of the recommendation code scripts were written in Python 3.9.12

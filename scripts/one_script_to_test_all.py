@@ -1,3 +1,161 @@
+########################################
+##### one script to test them all ######
+########################################
+
+""" download_and_load script """
+###############################################################################
+#### Download the python scripts and example data, and load them to memory ####
+###############################################################################
+
+"""
+This script:
+1. Downloads the python code and example data for the Green Pheasants recommendation system.
+2. Loads the scripts and the data to memory.
+"""
+
+"""
+Install (if necessary) and import the packages for the testing script
+"""
+# pip install requests
+# pip install subprocess
+# pip install pandas
+
+import requests
+import os
+import tempfile
+import pandas as pd
+
+"""
+Define functions for downloading the scripts and sample datasets from Github and saving them in the local environment
+"""
+
+def download_github_file(url, save_path):
+    response = requests.get(url)
+    response.raise_for_status()
+    
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    
+    with open(save_path, 'wb') as file:
+        file.write(response.content)
+
+def download_multiple_files(file_list):
+    for url, save_path in file_list:
+        download_github_file(url, save_path)
+        print(f"Downloaded {url} to {save_path}")
+        
+# Create a temporary directory
+temp_dir = tempfile.mkdtemp()
+
+"""
+Download the files from Github
+"""
+
+# Define lists of files to download
+scripts_to_download = [
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/configuration.py', os.path.join(temp_dir, 'configuration.py')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/functions.py', os.path.join(temp_dir, 'functions.py')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/train_visitors.py', os.path.join(temp_dir, 'train_visitors.py')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/train_users.py', os.path.join(temp_dir, 'train_users.py')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_item_online_visitor.py', os.path.join(temp_dir, 'choose_item_online_visitor.py')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_item_online_user.py', os.path.join(temp_dir, 'choose_item_online_user.py')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/choose_items_many_offline_users.py', os.path.join(temp_dir, 'choose_items_many_offline_users.py')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/scripts/functions_for_testing.py', os.path.join(temp_dir, 'functions_for_testing.py'))
+]
+
+data_to_download = [
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/example_data/df_users.pkl', os.path.join(temp_dir, 'df_users.pkl')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/example_data/df_items.pkl', os.path.join(temp_dir, 'df_items.pkl')),
+    ('https://raw.githubusercontent.com/n-levy/Green-Pheasants-Shared/main/example_data/df_interactions.pkl', os.path.join(temp_dir, 'df_interactions.pkl'))
+]
+
+# Download the scripts and data
+download_multiple_files(scripts_to_download)
+download_multiple_files(data_to_download)
+
+"""
+Load the data into memory
+"""
+
+# Load all scripts into memory directly as strings
+def load_scripts_as_strings(script_list):  
+    for _, path in script_list:
+        script_name = os.path.basename(path).replace('.py', '')
+        with open(path, 'r') as file:
+            globals()[script_name] = file.read()
+
+# Load all pickle data into memory and assign it to dataframes
+def load_dataframes(data_list):
+    for _, path in data_list:
+        name_without_extension = os.path.basename(path).replace('.pkl', '')
+        globals()[name_without_extension] = pd.read_pickle(path)
+
+# Execute the functions
+load_scripts_as_strings(scripts_to_download)
+load_dataframes(data_to_download)
+
+# Print paths for scripts to easily open them in your IDE
+print("Scripts downloaded to:")
+for _, path in scripts_to_download:
+    print(path)
+    
+print("Data downloaded to:")
+for _, path in data_to_download:
+    print(path)
+
+print("\nData loaded into memory.")
+
+### Caching the dataframes
+from joblib import dump
+
+def cache_dataframes(dataframes_dict, cache_dir):
+    """
+    Save the dataframes to disk for caching purposes.
+    
+    This function uses the joblib library to efficiently cache pandas dataframes. 
+    The dataframes are saved in the specified directory with a '.cache' extension.
+
+    Parameters:
+    - dataframes_dict (dict): A dictionary where the keys are dataframe names and 
+                              the values are the dataframes themselves.
+    - cache_dir (str): The directory where the cached dataframes will be saved.
+
+    Returns:
+    None
+    """
+    
+    for name, df in dataframes_dict.items():
+        dump(df, os.path.join(cache_dir, f"{name}.cache"))
+
+# Define a dictionary containing the dataframes you want to cache
+dataframes = {
+    "df_users": df_users,
+    "df_items": df_items,
+    "df_interactions": df_interactions
+}
+
+# Cache the dataframes to a temporary directory for later use
+cache_dataframes(dataframes, temp_dir)
+
+# Save temp_dir to a text file
+with open("H:\\My Drive\\sync\\Green Pheasants\\Data and code\\Production\\Green-Pheasants-Shared\\scripts\\temp_dir_path.txt", "w") as file:
+    file.write(temp_dir)
+
+""" configuration script """
+########################
+### Loading packages ###
+########################
+
+"""
+All of the recommendation code scripts were written in Python 3.9.12
+"""
+
+### import packages
+import pandas as pd
+import numpy as np
+import random
+from numpy.random import choice
+
+""" functions script """
 ###############################################################
 ##### Functions for Green Pheasants recommendation system #####
 ###############################################################
@@ -469,3 +627,244 @@ def function_choose_items_to_display_for_multiple_users(df_users_items_with_beta
         df_recommendations=pd.concat([df_recommendations, df_recommendation_for_one_user])
     
     return(df_recommendations)
+
+""" functions_for_testing script """
+#########################################################
+#### Functions for testing the recommendation system ####
+#########################################################
+
+##############################################################
+### create a dataframe of users requesting recommendations ###
+##############################################################
+
+import pandas as pd
+
+def create_users_requesting_recommendation(df_users, n):
+    """
+    Creates a dataframe with 'n' unique userids from the provided dataframe 'df_users'.
+
+    Parameters:
+    - df_users: Dataframe containing user data.
+    - n: Number of unique userids to be included in the output dataframe.
+
+    Returns:
+    - df_users_requesting_recommendation: Dataframe containing 'n' unique userids.
+    """
+    
+    # Get unique values
+    unique_values = df_users['userid'].unique()
+
+    # Create a subset using the first 'n' unique values.
+    subset = unique_values[:n]
+
+    # Create new series from subset of unique values
+    df_users_requesting_recommendation = pd.Series(subset)
+
+    # Convert the series to a dataframe
+    df_users_requesting_recommendation = df_users_requesting_recommendation.to_frame()
+
+    # Change column name to 'userid'
+    df_users_requesting_recommendation.columns = ['userid']
+
+    return df_users_requesting_recommendation
+
+###########################################################################################################
+### Check whether the online recommendation for a user or for a visitor has the specified theme or mood ###
+###########################################################################################################
+
+def check_item_theme_mood(theme, mood):
+    """
+    Display details of the recommended items based on given theme and mood.
+
+    The function merges `df_results` with `df_items` based on the item ID, 
+    and for each recommended item, it displays:
+        - Item name
+        - Themes associated with the item
+        - Moods associated with the item
+        - Whether the chosen theme matches any of the item's themes
+        - Whether the chosen mood matches any of the item's moods
+
+    Parameters:
+        - theme (str): The chosen theme to check against the item's themes. 
+                       Use 'all' if no specific theme is chosen.
+        - mood (str): The chosen mood to check against the item's moods.
+                      Use 'all' if no specific mood is chosen.
+
+    Note:
+        - The function assumes the existence of global dataframes `df_results` and `df_items`.
+        - 'NaN' values in themes or moods are excluded from the display.
+    """
+    
+    # If both theme and mood are 'all', print the message and exit
+    if theme == 'all' and mood == 'all':
+        print("No specific theme or mood was chosen.")
+        return
+
+    # Merging the dataframes to get item details
+    item_details = pd.merge(df_results, df_items, left_on='recommended_item', right_on='itemid')
+    
+    for _, item in item_details.iterrows():
+        # Display the item name (ititle)
+        print(f"\nItem Name: {item['ititle']}")
+        
+        # Extract themes and moods while ensuring they are strings
+        themes = item[['itheme1', 'itheme2', 'itheme3', 'itheme4', 'itheme5']].astype(str)
+        # Exclude 'nan' from themes for display
+        print(f"Themes: {', '.join([th for th in themes if th != 'nan'])}")
+        
+        moods = item[['imood1', 'imood2', 'imood3']].astype(str)
+        # Exclude 'nan' from moods for display
+        print(f"Moods: {', '.join([md for md in moods if md != 'nan'])}")
+        
+        theme_matched = False
+        # Check if chosen theme is in the themes of the item
+        if theme != 'all':
+            for i, th in enumerate(themes, 1):
+                if th == theme:
+                    print(f"The recommended item has the chosen theme (itheme{i})")
+                    theme_matched = True
+                    break
+            if not theme_matched:
+                print(f"The recommended item does not have the chosen theme ({theme}).")
+        
+        mood_matched = False
+        # Check if chosen mood is in the moods of the item
+        if mood != 'all':
+            for i, md in enumerate(moods, 1):
+                if md == mood:
+                    print(f"The recommended item has the chosen mood (imood{i})")
+                    mood_matched = True
+                    break
+            if not mood_matched:
+                print(f"The recommended item does not have the chosen mood ({mood}).")
+
+""" run train_visitors script """
+###########################################
+##### Training the model for visitors #####
+###########################################
+
+""" Prepare the data for analysis """
+### Prepare the interactions dataframe
+# Remove rows with missing values in columns needed for the recommendation code
+df_interactions = function_remove_rows_with_missing_values(df_interactions)
+
+""" Calculate the betas """
+# calculate the betas
+df_items_with_betas = function_calculate_probabilities_visitors(df_interactions, df_items) 
+
+# Note
+"""
+The input datasets should be imported from the PWA's database (df_items, df_interactions).
+
+"""
+
+# examine the output
+print(df_items_with_betas.info())
+
+
+""" run train_users script """
+#####################################
+##### Train the model for users #####
+#####################################
+
+""" Prepare the data for analysis """
+### Prepare the interactions dataframe
+# Remove rows with missing values in columns needed for the recommendation code
+df_interactions = function_remove_rows_with_missing_values(df_interactions)
+
+# Create necessary cloumns in df_interactions
+df_interactions = function_add_columns(df_interactions)
+
+# Create a dataframe with all combinations of users and items
+df_users_items = function_attach_userids_to_items(df_users, df_items)
+
+# Remove items that the users have viewed in the past
+df_users_items = function_removing_viewed_items(df_interactions, df_users_items)
+
+""" Calculate the betas """
+# calculate the betas 
+df_users_items_with_betas = function_calculate_probabilities_users(df_users, df_items, df_interactions)
+
+# Note
+"""
+The input datasets should be imported from the PWA's database (df_users, df_items, df_interactions).
+
+"""
+
+# examine the output
+print(df_users_items_with_betas.info())
+
+# choose theme and mood for the test 
+theme = 'all'
+mood = 'Reflective'
+
+""" run choose_item_online_visitor script """
+##################################################
+##### Choosing an item for an online visitor #####
+##################################################
+
+# calculate the probabilities
+df_with_final_predictions = function_calculate_recommendation_probabilities_one_visitor(df_items_with_betas, theme, mood) 
+
+# choose one item to display
+df_results = function_choose_one_item_to_display(df_with_final_predictions)
+
+# Notes
+"""
+1. df_interactions and df_items_with_betas should be created by the "training_users" algorithm.
+
+2. df_users, df_items, and df_users_requesting_recommendation should be imported from the PWA 
+
+3. If you wish to read a more detailed description of each functions, see 'functions' script.
+"""
+
+# examine the output
+print(df_results)
+
+# check item has the chosen theme or mood
+check_item_theme_mood(theme, mood)
+
+# choose a different theme and mood for the test
+theme = 'Loss'
+mood = 'all'
+
+# choose one random userid
+df_users_requesting_recommendation = create_users_requesting_recommendation(df_users, 1)
+# make sure that it worked properly
+print(df_users_requesting_recommendation)
+
+""" run choose_item_online_user script """
+###############################################
+##### Choosing an item for an online user #####
+###############################################
+
+# calculate the probabilities
+df_with_final_predictions = function_calculate_recommendation_probabilities_one_user(df_users_requesting_recommendation, df_users_items_with_betas, theme, mood) # calculating the final predictions
+
+# choose one item to display
+df_results = function_choose_one_item_to_display(df_with_final_predictions) # choosing the item to display
+
+# examine the output
+print(df_results)
+
+# check item has the chosen theme or mood
+check_item_theme_mood(theme, mood)
+
+# Randomly choose multiple userids
+df_users_requesting_recommendation = create_users_requesting_recommendation(df_users, 5)
+# make sure that it worked properly
+print(df_users_requesting_recommendation)
+
+""" run the choose_items_many_offline_users script """
+###################################################
+##### Choosing an item for many offline users #####
+###################################################
+
+# calculate the betas 
+df_users_items_with_betas = function_calculate_probabilities_users(df_users, df_items, df_interactions)
+
+# calculate the probabilities and choose an item for each user, then show all choices in a dataframe
+df_results = function_choose_items_to_display_for_multiple_users(df_users_items_with_betas, df_users_requesting_recommendation)
+
+# examine the results
+print(df_results)

@@ -99,5 +99,38 @@ for _, path in data_to_download:
 
 print("\nData loaded into memory.")
 
+### Caching the dataframes
+from joblib import dump
 
+def cache_dataframes(dataframes_dict, cache_dir):
+    """
+    Save the dataframes to disk for caching purposes.
+    
+    This function uses the joblib library to efficiently cache pandas dataframes. 
+    The dataframes are saved in the specified directory with a '.cache' extension.
 
+    Parameters:
+    - dataframes_dict (dict): A dictionary where the keys are dataframe names and 
+                              the values are the dataframes themselves.
+    - cache_dir (str): The directory where the cached dataframes will be saved.
+
+    Returns:
+    None
+    """
+    
+    for name, df in dataframes_dict.items():
+        dump(df, os.path.join(cache_dir, f"{name}.cache"))
+
+# Define a dictionary containing the dataframes you want to cache
+dataframes = {
+    "df_users": df_users,
+    "df_items": df_items,
+    "df_interactions": df_interactions
+}
+
+# Cache the dataframes to a temporary directory for later use
+cache_dataframes(dataframes, temp_dir)
+
+# Save temp_dir to a text file
+with open("H:\\My Drive\\sync\\Green Pheasants\\Data and code\\Production\\Green-Pheasants-Shared\\scripts\\temp_dir_path.txt", "w") as file:
+    file.write(temp_dir)
